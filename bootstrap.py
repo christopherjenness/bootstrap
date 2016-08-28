@@ -14,7 +14,7 @@ class Bootstrap:
     def __init__(self):
         return
     
-    def resample(self, data, parametric=False):
+    def bootstrap_sample(self, data, parametric=False):
         """
         Resamples data by random sample with replacement
         
@@ -24,7 +24,7 @@ class Bootstrap:
                 if False, use nonparametric bootstrap sampling
         
         Returns:
-            resampled data (array)
+            bootstrap resampled data (array)
         """
         sample_size = len(data)
         if parametric == 'normal':
@@ -37,6 +37,20 @@ class Bootstrap:
         else:
             indices = [np.random.randint(0, sample_size) for i in range(sample_size)]
             return data[indices]
+            
+    def jackknife_sample(self, data, index):
+        """
+        Single jackknife sample of data
+        
+        Args:
+            data (np.array): array of data to resample
+            index (int): Index of array to leave out in jackknife sample
+            
+        Returns:
+            jackknife resampled data (array)
+        """
+        jackknife = np.delete(data, index)
+        return jackknife
         
     def bootstrap_statistic(self, data, func=np.mean, n_samples=50, parametric=False):
         """
@@ -54,10 +68,11 @@ class Bootstrap:
         """
         statistics = []
         for sample in range(n_samples):
-            resample = self.resample(data, parametric=parametric)
+            resample = self.bootstrap_sample(data, parametric=parametric)
             statistic = func(resample)
             statistics.append(statistic)
         return (np.mean(statistics), stats.sem(statistics))
+        
         
 
 data = np.random.uniform(0, 1, 100)
