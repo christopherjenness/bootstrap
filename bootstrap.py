@@ -17,8 +17,17 @@ class Bootstrap:
     
     
     def resample(self, data):
-        for i in range(len(data)):
-            return np.random.randint(0, len(data))
+        """
+        Resamples data by random sample with replacement
+        
+        Args:
+            data (np.array): array of data to resample
+        
+        Returns:
+            array: array of resampled data
+        """
+        sample_size = len(data)
+        return [np.random.randint(0, sample_size) for i in range(sample_size)]
 
     def estimate_standard_error(self, data, func=np.mean, n_samples=50):
         """
@@ -30,14 +39,33 @@ class Bootstrap:
         """
         statistics = []
         for sample in range(n_samples):
-            statistic = func(data[self.resample(data)])
+            indices = self.resample(data)
+            statistic = func(data[indices])
             statistics.append(statistic)
+            print (data[indices])
+        print (statistics)
         return np.mean(statistics), sem(statistics)
 
 a = Bootstrap(np.random.uniform(0, 1, 100))
+a.resample(a.data)
 b = a.data[a.resample(a.data)]
 print(b)
 c = a.estimate_standard_error(a.data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
