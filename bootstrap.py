@@ -60,7 +60,9 @@ class Bootstrap:
             data (array): array of data to calculate statistic and SE of statistic
             func (function): statistical function to calculate on data
                 examples: np.mean, np.median
-            n_samples (int): number of bootstrap samples to 
+            n_samples (int): number of bootstrap samples to calculate statistic for
+            parametric (str) in ['normal', 'uniform']: parametric distribution to resample from
+                if False, use nonparametric bootstrap sampling
             
         Returns:
             statistic (tuple), sem (tuple)
@@ -73,10 +75,23 @@ class Bootstrap:
             statistics.append(statistic)
         return (np.mean(statistics), stats.sem(statistics))
         
+    def jackknife_statistic(self, data, func=np.mean):
+        """
+        Jackknifes a statistic and calculates the standard error of the statistic
         
-
-data = np.random.uniform(0, 1, 100)
-data2 = np.random.normal(50, 5, 100)
-bootstrap = Bootstrap()
-bootstrap_mean = bootstrap.bootstrap_statistic(data2, parametric='normal')
-print(bootstrap_mean)
+        Args:
+            data (array): array of data to calculate statistic and SE of statistic
+            func (function): statistical function to calculate on data
+                examples: np.mean, np.median
+            
+        Returns:
+            statistic (tuple), sem (tuple)
+            Returns the jackknifed statistic and the SEM of the statistic
+        """
+        n_samples = len(data)
+        statistics = []
+        for sample in range(n_samples):
+            jack_sample = self.jackknife_sample(data, sample)
+            statistic = func(jack_sample)
+            statistics.append(statistic)
+        return (np.mean(statistics), stats.sem(statistics))
