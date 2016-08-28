@@ -7,13 +7,12 @@ An introduction to the bootstrap. CRC press, 1994.
 """
 
 import numpy as np
-from scipy.stats import sem
+from scipy import stats
 
 class Bootstrap:
     
     def __init__(self):
         return
-    
     
     def resample(self, data, parametric=False):
         """
@@ -21,20 +20,21 @@ class Bootstrap:
         
         Args:
             data (np.array): array of data to resample
-            parametric (str) in ['gaussian', 'uniform']: parametric distribution to resample from
-                if False, use nonparametric bootstrap
+            parametric (str) in ['normal', 'uniform']: parametric distribution to resample from
+                if False, use nonparametric bootstrap sampling
         
         Returns:
             resampled data (array)
         """
-        if parametric == 'gaussian':
-            # TODO code for gaussian resampling
-            pass
+        sample_size = len(data)
+        if parametric == 'normal':
+            mean_estimate = np.mean(data)
+            std_estimate = np.std(data)
+            return np.random.normal(mean_estimate, std_estimate, size=sample_size)
         elif parametric == 'uniform':
-            # TODO code for uniform resampling
-            pass
+            min_estimate, max_estimate = np.min(data), np.max(data)
+            return np.random.uniform(min_estimate, max_estimate, size=sample_size)
         else:
-            sample_size = len(data)
             indices = [np.random.randint(0, sample_size) for i in range(sample_size)]
             return data[indices]
         
@@ -57,37 +57,11 @@ class Bootstrap:
             resample = self.resample(data, parametric=parametric)
             statistic = func(resample)
             statistics.append(statistic)
-        return (np.mean(statistics), sem(statistics))
+        return (np.mean(statistics), stats.sem(statistics))
         
 
 data = np.random.uniform(0, 1, 100)
+data2 = np.random.normal(50, 5, 100)
 bootstrap = Bootstrap()
-bootstrap_mean = bootstrap.bootstrap_statistic(data)
+bootstrap_mean = bootstrap.bootstrap_statistic(data2, parametric='normal')
 print(bootstrap_mean)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
