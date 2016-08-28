@@ -52,7 +52,8 @@ class Bootstrap:
         jackknife = np.delete(data, index)
         return jackknife
         
-    def bootstrap_statistic(self, data, func=np.mean, n_samples=50, parametric=False):
+    def bootstrap_statistic(self, data, func=np.mean, n_samples=50, 
+                            parametric=False, bias_correction=False):
         """
         Bootstraps a statistic and calculates the standard error of the statistic
         
@@ -63,17 +64,24 @@ class Bootstrap:
             n_samples (int): number of bootstrap samples to calculate statistic for
             parametric (str) in ['normal', 'uniform']: parametric distribution to resample from
                 if False, use nonparametric bootstrap sampling
+            bias_correction (bool): if True, bias correct bootstrap statistic 
             
         Returns:
-            statistic (tuple), sem (tuple)
-            Returns the bootstrapped statistic and the SEM of the statistic
+            tuple: (statistic (float), bias (float), sem (float))
+            Returns the bootstrapped statistic, its bias and SEM.
         """
+        plugin_estimate = func(data)
         statistics = []
         for sample in range(n_samples):
             resample = self.bootstrap_sample(data, parametric=parametric)
             statistic = func(resample)
             statistics.append(statistic)
-        return (np.mean(statistics), stats.sem(statistics))
+        statistic = np.mean(statistics)
+        bias = statistic - plugin_estimate
+        if bias_correction:
+            statistic = statistic - bias
+        sem = stats.sem(statistics)
+        return (statistic, bias, sem)
         
     def jackknife_statistic(self, data, func=np.mean):
         """
