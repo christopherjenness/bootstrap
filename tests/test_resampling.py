@@ -27,7 +27,7 @@ class ResamplingTestCase(BootstrapInit):
     def testUniformParametric(self):
         bootstrap_data = self.bootstrap.bootstrap_sample(self.uniform_data, parametric='uniform')
         self.assertAlmostEqual(np.mean(self.uniform_data)/10000, np.mean(bootstrap_data)/10000, 3)
-        self.assertEqual(len(bootstrap_data), len(self.normal_data))
+        self.assertEqual(len(bootstrap_data), len(self.uniform_data))
 
 if __name__ == '__main__':
     unittest.main()
