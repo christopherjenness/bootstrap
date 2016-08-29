@@ -38,6 +38,29 @@ class Bootstrap:
             indices = [np.random.randint(0, sample_size) for i in range(sample_size)]
             return data[indices]
             
+    def bootstrap_matrixsample(self, data, axis=0):
+        """
+        Resamples a matrix by rows or columns
+
+        Args:
+         data (np.matrix): matrix of data to resample 
+         axis (int) in [0, 1]: axis to resample by
+             if 0: resample rows
+             if 1: resample columns
+
+        Returns:
+            bootstrap resampled data (matrix)        
+        """
+        if axis == 0:
+            n_rows = np.shape(data)[0]
+            samples = np.random.randint(n_rows, size=n_rows)
+            bootstrap_matrix = data[samples, :]
+        elif axis ==1:
+            n_cols = np.shape(data)[1]
+            samples = np.random.randint(n_cols, size=n_cols)
+            bootstrap_matrix = data[:, samples]
+        return bootstrap_matrix
+
     def jackknife_sample(self, data, index):
         """
         Single jackknife sample of data
