@@ -76,18 +76,22 @@ class Bootstrap:
         return jackknife
         
     def bootstrap_statistic(self, data, func=np.mean, n_samples=50, 
-                            parametric=False, bias_correction=False):
+                            parametric=False, bias_correction=False,
+                            axis=0):
         """
         Bootstraps a statistic and calculates the standard error of the statistic
         
         Args:
-            data (array): array of data to calculate statistic and SE of statistic
+            data (array or matrix): array or matrix of data to calculate statistic and SE of statistic
             func (function): statistical function to calculate on data
                 examples: np.mean, np.median
             n_samples (int): number of bootstrap samples to calculate statistic for
             parametric (str) in ['normal', 'uniform']: parametric distribution to resample from
                 if False, use nonparametric bootstrap sampling
             bias_correction (bool): if True, bias correct bootstrap statistic 
+            axis (int) in [0, 1]: if type(data) == np.matrix, axis to resample by
+                if 0: resample rows
+                if 1: resample columns
             
         Returns:
             tuple: (statistic (float), bias (float), sem (float))
@@ -96,7 +100,10 @@ class Bootstrap:
         plugin_estimate = func(data)
         statistics = []
         for sample in range(n_samples):
-            resample = self.bootstrap_sample(data, parametric=parametric)
+            if type(data) == np.matrix:
+                resample = self.bootstrap_matrixsample(data, axis=axis)
+            else: 
+                resample = self.bootstrap_sample(data, parametric=parametric)
             statistic = func(resample)
             statistics.append(statistic)
         statistic = np.mean(statistics)
