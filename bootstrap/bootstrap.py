@@ -107,11 +107,12 @@ class Bootstrap:
             statistic = func(resample)
             statistics.append(statistic)
         statistic = np.mean(statistics)
+        confidence_interval = self.calculate_ci(statistics)
         bias = statistic - plugin_estimate
         if bias_correction:
             statistic = statistic - bias
         sem = stats.sem(statistics)
-        return (statistic, bias, sem)
+        return (statistic, bias, sem, confidence_interval)
         
     def jackknife_statistic(self, data, func=np.mean):
         """
@@ -133,3 +134,31 @@ class Bootstrap:
             statistic = func(jack_sample)
             statistics.append(statistic)
         return (np.mean(statistics), stats.sem(statistics))
+        
+    def calculate_ci(self, statistics, alpha=0.05, bca=False):
+        """
+        Calculates bootstrapped confidence interval using percentile 
+        intervals.
+        
+        Args:
+            statistics (array): array of bootstrapped statistics to calculate
+                confidence interval for
+            alpha (float): percentile used for upper and lower bounds of confidence
+                interval.  NOTE: Currently, both upper and lower bounds can have
+                the same alpha.
+            bca (bool): If true, use bias correction and accelerated (BCa) method
+        
+        Returns: tuple (ci_low, ci_high)
+            ci_low (float): lower bound on confidence interval
+            ci_high (float): upper bound on confidence interval
+        """
+        sorted_statistics = np.sort(statistics)
+        low_index = int(np.floor(alpha * len(statistics)))
+        high_index = int(np.ceil((1 - alpha) * len(statistics)))
+        #Correct for 0 based indexing
+        if low_index > 0:
+            low_index -= 1 
+        high_index -= 1
+        low_value = sorted_statistics[low_index]
+        high_value = sorted_statistics[high_index]
+        return (low_value, high_value)
