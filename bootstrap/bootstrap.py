@@ -77,18 +77,21 @@ class Bootstrap:
         
     def bootstrap_statistic(self, data, func=np.mean, n_samples=50, 
                             parametric=False, bias_correction=False,
-                            axis=0):
+                            alpha = 0.5, bca=False, axis=0):
         """
         Bootstraps a statistic and calculates the standard error of the statistic
         
         Args:
-            data (array or matrix): array or matrix of data to calculate statistic and SE of statistic
+            data (array or matrix): array or matrix of data to calculate statistic 
+                and SE of statistic
             func (function): statistical function to calculate on data
                 examples: np.mean, np.median
             n_samples (int): number of bootstrap samples to calculate statistic for
             parametric (str) in ['normal', 'uniform']: parametric distribution to resample from
                 if False, use nonparametric bootstrap sampling
             bias_correction (bool): if True, bias correct bootstrap statistic 
+            bca (bool): If true, use bias correction and accelerated (BCa) method to
+                calculate bootstrap
             axis (int) in [0, 1]: if type(data) == np.matrix, axis to resample by
                 if 0: resample rows
                 if 1: resample columns
@@ -107,7 +110,7 @@ class Bootstrap:
             statistic = func(resample)
             statistics.append(statistic)
         statistic = np.mean(statistics)
-        confidence_interval = self.calculate_ci(statistics)
+        confidence_interval = self.calculate_ci(data, statistics, alpha=alpha, bca=bca)
         bias = statistic - plugin_estimate
         if bias_correction:
             statistic = statistic - bias
@@ -133,9 +136,10 @@ class Bootstrap:
             jack_sample = self.jackknife_sample(data, sample)
             statistic = func(jack_sample)
             statistics.append(statistic)
-        return (np.mean(statistics), stats.sem(statistics))
+        return (np.mean(statistics), stats.sem(statistics), statistics)
         
-    def calculate_ci(self, statistics, alpha=0.05, bca=False):
+    def calculate_ci(self, data, statistics, func=np.mean,
+                     alpha=0.05, bca=False):
         """
         Calculates bootstrapped confidence interval using percentile 
         intervals.
@@ -147,11 +151,29 @@ class Bootstrap:
                 interval.  NOTE: Currently, both upper and lower bounds can have
                 the same alpha.
             bca (bool): If true, use bias correction and accelerated (BCa) method
+            theta_hat (float): Original estimate of the statistic from the data.
+                Used to calculate BCa confidence interval.
         
         Returns: tuple (ci_low, ci_high)
             ci_low (float): lower bound on confidence interval
             ci_high (float): upper bound on confidence interval
         """
+        # If BCa method, update alpha
+        if bca:
+            #Calculate bias term, z
+            plugin_estimate = func(data)
+            bias_fraction = len(np.where(statistics < plugin_estimate)[0]) / len(statistics)
+            z = stats.norm.ppf(bias_fraction)
+            # Calculate acceleration term, a
+            j_statistic, j_sem, j_values = self.jackknife_statistic(data, func)
+            numerator, denominator = 0, 0
+            for value in j_values:
+                numerator += (value - j_statistic)**3
+                denominator += (value - j_statistic)**2
+            a = numerator / (6 * denominator**(3/2))
+            bca_alpha = stats.norm.cdf(z + (z + stats.norm.ppf(alpha)) / 
+                        1 - a * (z + stats.norm.ppf(alpha)))
+            alpha = bca_alpha
         sorted_statistics = np.sort(statistics)
         low_index = int(np.floor(alpha * len(statistics)))
         high_index = int(np.ceil((1 - alpha) * len(statistics)))
