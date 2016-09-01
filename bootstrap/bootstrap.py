@@ -184,3 +184,72 @@ class Bootstrap:
         low_value = sorted_statistics[low_index]
         high_value = sorted_statistics[high_index]
         return (low_value, high_value)
+        
+    def two_sample_testing(self, sampleA, sampleB, 
+                           statistic_func=self._compare_means, n_samples=50):
+        """
+        Compares two samples via bootstrapping to determine if they came from
+        the same distribution. 
+
+        Args:
+            sampleA (np.array): Array of data from sample A
+            sampleB (np.array): Array of data form sample B
+            statistic_func (function): Function that compares two data sets
+                returns statistic. Function must exept two args (np.array, np.array)
+                where each array is a sample.
+                Example: lambda data1, data2: np.mean(data1) - np.mean(data2)
+                This fucntion compares the means of two data sets
+            n_samples: number of bootstrap samples to generate 
+            
+        Returns: 
+            bootstrapped achieved significance level (float)
+        """
+        observed_statistic = statistic_func(sampleA, sampleB)
+        combined_sample = np.append(sampleA, sampleB)
+        #Store sample sizes
+        m = len(sampleA)
+        n = len(sampleB)
+        #Count the number of bootstrap samples with statistic > observed_statistic
+        counter = 0
+        for sample in range(n_samples):
+            bootstrap_sample = self.bootstrap_sample(combined_sample)
+            boot_sampleA = bootstrap_sample[:m]
+            boot_sampleB = bootstrap_sample[m:]
+            boostrap_statistic = statistic_func(boot_sampleA, boot_sampleB)
+            if bootstrap_statistic > observed_statistic:
+                counter += 1
+        ASL = counter / float(m + n)
+        return ASL
+            
+    def _compare_means(self, sampleA, sampleB):
+        """
+        Compares the mean of two samples
+
+        Args:
+            sampleA (np.array): Array of data from sample A
+            sampleB (np.array): Array of data form sample B
+
+        Returns:
+            difference (float): difference in mean between the two samples
+        """
+        difference = np.mean(sampleA) - np.mean(sampleB)
+        return difference
+        
+    def _t_test_statistic(self, sampleA, sampleB):
+        """
+        Computes the t test statistic of two samples
+
+        Args:
+            sampleA (np.array): Array of data from sample A
+            sampleB (np.array): Array of data form sample B
+
+        Returns:
+            t_stat (float): t test statistic of two sampels
+        """
+        difference = self.compare_means(sampleA, sampleB)
+        #Store lengths of samples
+        n = len(sampleA)
+        m = len(sampleB)
+        stdev = (np.var(sampleA)/n + np.var(sampleB)/m)**0.5
+        t_stat = difference / stdev
+        return t_stat
