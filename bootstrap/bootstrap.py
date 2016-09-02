@@ -186,7 +186,7 @@ class Bootstrap:
         return (low_value, high_value)
         
     def two_sample_testing(self, sampleA, sampleB, 
-                           statistic_func=self._compare_means, n_samples=50):
+                           statistic_func=None, n_samples=50):
         """
         Compares two samples via bootstrapping to determine if they came from
         the same distribution. 
@@ -204,6 +204,8 @@ class Bootstrap:
         Returns: 
             bootstrapped achieved significance level (float)
         """
+        if statistic_func == None:
+            statistic_func = self._compare_means
         observed_statistic = statistic_func(sampleA, sampleB)
         combined_sample = np.append(sampleA, sampleB)
         #Store sample sizes
@@ -215,7 +217,7 @@ class Bootstrap:
             bootstrap_sample = self.bootstrap_sample(combined_sample)
             boot_sampleA = bootstrap_sample[:m]
             boot_sampleB = bootstrap_sample[m:]
-            boostrap_statistic = statistic_func(boot_sampleA, boot_sampleB)
+            bootstrap_statistic = statistic_func(boot_sampleA, boot_sampleB)
             if bootstrap_statistic > observed_statistic:
                 counter += 1
         ASL = counter / float(m + n)
@@ -246,7 +248,7 @@ class Bootstrap:
         Returns:
             t_stat (float): t test statistic of two sampels
         """
-        difference = self.compare_means(sampleA, sampleB)
+        difference = self._compare_means(sampleA, sampleB)
         #Store lengths of samples
         n = len(sampleA)
         m = len(sampleB)
