@@ -39,9 +39,27 @@ class TwoSampleTestCase(BootstrapInit):
         t_statistic = bootstrap.t_test_statistic(self.normal_data2, self.normal_data)
         self.assertAlmostEqual(t_statistic / 10000, 0.007, 3)
         
-    def testTStatisticSmall(self):
+    def testTStatisticZero(self):
         t_statistic = bootstrap.t_test_statistic(self.normal_data, self.normal_data)
         self.assertEqual(t_statistic, 0)
+
+    def testTwoSampleZero(self):
+        ASL = bootstrap.two_sample_testing(self.normal_data2, self.normal_data)
+        self.assertEqual(ASL, 0)
+        
+    def testTwoSampleBig(self):
+        ASL = bootstrap.two_sample_testing(self.normal_data, self.normal_data)
+        self.assertGreater(ASL, 0.05)
+        
+    def testTwoSampleTTest(self):
+        ASL = bootstrap.two_sample_testing(self.normal_data2, self.normal_data, 
+                                           statistic_func=bootstrap.t_test_statistic)
+        self.assertEqual(ASL, 0)
+
+    def testTwoSampleTTestBit(self):
+        ASL = bootstrap.two_sample_testing(self.normal_data, self.normal_data, 
+                                           statistic_func=bootstrap.t_test_statistic)
+        self.assertGreater(ASL, 0.05)
 
 if __name__ == '__main__':
     unittest.main()
