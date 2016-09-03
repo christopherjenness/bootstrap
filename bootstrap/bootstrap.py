@@ -74,7 +74,7 @@ def jackknife_sample(data, index):
 
 def bootstrap_statistic(data, func=np.mean, n_samples=50,
                         parametric=False, bias_correction=False,
-                        alpha=0.5, bca=False, axis=0):
+                        alpha=0.05, bca=False, axis=0):
     """
     Bootstraps a statistic and calculates the standard error of the statistic
 
@@ -107,7 +107,7 @@ def bootstrap_statistic(data, func=np.mean, n_samples=50,
         statistic = func(resample)
         statistics.append(statistic)
     statistic = np.mean(statistics)
-    confidence_interval = calculate_ci(data, statistics, alpha=alpha, bca=bca)
+    confidence_interval = calculate_ci(data, statistics, func=func, alpha=alpha, bca=bca)
     bias = statistic - plugin_estimate
     if bias_correction:
         statistic = statistic - bias
@@ -252,3 +252,6 @@ def t_test_statistic(sampleA, sampleB):
     stdev = (np.var(sampleA)/n + np.var(sampleB)/m)**0.5
     t_stat = difference / stdev
     return t_stat
+
+normal_data = np.random.normal(100, 10, size=100)
+statistic, bias, sem, confidence_interval = bootstrap_statistic(normal_data)
