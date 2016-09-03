@@ -29,6 +29,12 @@ class ResamplingTestCase(BootstrapInit):
         bootstrap_data = bootstrap.bootstrap_sample(self.uniform_data, parametric='uniform')
         self.assertAlmostEqual(np.mean(self.uniform_data)/10000, np.mean(bootstrap_data)/10000, 3)
         self.assertEqual(len(bootstrap_data), len(self.uniform_data))
+
+        
+    def testJackknifeSample(self):
+        jackknife_data = bootstrap.jackknife_sample(self.uniform_data, 10)
+        self.assertAlmostEqual(np.mean(self.uniform_data)/10000, np.mean(jackknife_data)/10000, 3)
+        self.assertEqual(len(jackknife_data) + 1, len(self.uniform_data))
         
 class TwoSampleTestCase(BootstrapInit):
     def testMeanDifference(self):
@@ -60,7 +66,69 @@ class TwoSampleTestCase(BootstrapInit):
         ASL = bootstrap.two_sample_testing(self.normal_data, self.normal_data, 
                                            statistic_func=bootstrap.t_test_statistic)
         self.assertGreater(ASL, 0.05)
+        
+class MatrixTestCase(BootstrapInit):
+    
+    def testMatrixResamplingCol(self):
+        matrix_sample = np.matrix(bootstrap.bootstrap_matrixsample(self.matrix_data, axis=1))
+        self.assertEqual(np.shape(matrix_sample), np.shape(self.matrix_data))
+        self.assertAlmostEqual(np.average(matrix_sample)/100000, np.mean(self.matrix_data)/100000, 3)
+        
+class StatisticsTestCast(BootstrapInit):
+    def testBootstrapMean(self):
+        statistic, bias, sem, confidence_interval = bootstrap.bootstrap_statistic(self.normal_data)
+        self.assertAlmostEqual(statistic/100000, 100/100000, 3)
+        self.assertAlmostEqual(np.abs(bias/100), 0.1/100, 3)
+        self.assertAlmostEqual(sem/100, 0.1/100, 3)
+        self.assertEqual(len(confidence_interval), 2)
+        self.assertTrue(confidence_interval[0] < confidence_interval[1])
+        self.assertTrue(confidence_interval[1] - confidence_interval[0] < 5)
+        
+    def testBoostrapMedian(self):
+        statistic, bias, sem, confidence_interval = bootstrap.bootstrap_statistic(self.normal_data, func=np.median)
+        self.assertAlmostEqual(statistic/100000, 100/100000, 3)
+        self.assertAlmostEqual(np.abs(bias/100), 0.3/100, 3)
+        self.assertAlmostEqual(sem/100, 0.1/100, 3)
+        self.assertEqual(len(confidence_interval), 2)
+        self.assertTrue(confidence_interval[0] < confidence_interval[1])
+        self.assertTrue(confidence_interval[1] - confidence_interval[0] < 5)
 
+    def testBootstrapBCa(self):
+        statistic, bias, sem, confidence_interval = bootstrap.bootstrap_statistic(self.normal_data, bca=True)
+        self.assertAlmostEqual(statistic/100000, 100/100000, 3)
+        self.assertAlmostEqual(np.abs(bias/100), 0.1/100, 3)
+        self.assertAlmostEqual(sem/100, 0.1/100, 3)
+        self.assertEqual(len(confidence_interval), 2)
+        self.assertTrue(confidence_interval[0] < confidence_interval[1])
+        self.assertTrue(confidence_interval[1] - confidence_interval[0] < 5)
+        
+    def testBoostrapParams(self): 
+        statistic, bias, sem, confidence_interval = bootstrap.bootstrap_statistic(self.normal_data, 
+                                                                                  parametric='normal',
+                                                                                  bias_correction=True,
+                                                                                  alpha=0.1)
+        self.assertAlmostEqual(statistic/100000, 100/100000, 3)
+        self.assertAlmostEqual(np.abs(bias/100), 0.1/100, 3)
+        self.assertAlmostEqual(sem/100, 0.2/100, 3)
+        self.assertEqual(len(confidence_interval), 2)
+        self.assertTrue(confidence_interval[0] < confidence_interval[1])
+        self.assertTrue(confidence_interval[1] - confidence_interval[0] < 5)
+        
+    def testBootstrapMatrix(self):
+        statistic, bias, sem, confidence_interval = bootstrap.bootstrap_statistic(self.normal_data)
+        self.assertAlmostEqual(statistic/100000, 100/100000, 3)
+        self.assertAlmostEqual(np.abs(bias/100), 0.1/100, 3)
+        self.assertAlmostEqual(sem/100, 0.1/100, 3)
+        self.assertEqual(len(confidence_interval), 2)
+        self.assertTrue(confidence_interval[0] < confidence_interval[1])
+        self.assertTrue(confidence_interval[1] - confidence_interval[0] < 5)
+        
+    def testJackknifeMean(self):
+        statistic, sem, statistics = bootstrap.jackknife_statistic(self.normal_data)
+        self.assertAlmostEqual(statistic/100000, np.mean(self.normal_data)/100000, 3)
+        self.assertAlmostEqual(sem/10, 0.1/100, 3)
+        self.assertEqual(len(statistics), len(self.normal_data))
+        
 if __name__ == '__main__':
     unittest.main()
     
