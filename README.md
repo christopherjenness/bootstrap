@@ -43,6 +43,7 @@ Next, we will bootstrap 10,000 samples, to bootstrap the mean and 95% confidence
 
 ```python
 results = bootstrap_statistic(data.data[:,0], func=np.mean, n_samples=10000)
+
 # Make plot of bootstrapped mean
 plt.hist(results.statistics, bins=40)
 plt.title('Bootstrapped Means')
@@ -62,8 +63,10 @@ An advantage of the bootstrap method is its adaptability.  For example, you can 
 def percentile(data):
     """returns 95th percentile of data"""
     return np.percentile(data, 95)
+    
 # Bootstrap the 95th percentile
 results = bootstrap_statistic(data.data[:,0], func=percentile, n_samples=10000)
+
 # Make plot of bootstrapped 95th percentile
 plt.hist(results.statistics, bins=40)
 plt.title('Bootstrapped 95th Percentiles')
@@ -81,6 +84,8 @@ Additionally, the library can perform two sample testing.  First lets view the d
 ```python
 benign = data.data[data.target == 0]
 malignant = data.data[data.target == 1]
+
+# Plot benign and malignant samples
 plt.hist(benign[:,0], bins=30, alpha=0.5, label='benign')
 plt.hist(malignant[:,0], bins=30, alpha=0.5, label='malignant')
 plt.legend()
@@ -97,3 +102,22 @@ significance = two_sample_testing(benign[:, 0], malignant[:, 0],
 print(significance) # prints 0.0
 ```
 Hmmm, with 5,000 random bootstrapped samples, not a single one had the difference of means of the observed samples.
+
+What about a feature that is less predictive?  Below, we look at feature 9.
+
+```python
+plt.hist(benign[:,9], bins=30, alpha=0.5, label='benign')
+plt.hist(malignant[:,9], bins=30, alpha=0.5, label='malignant')
+plt.legend()
+plt.xlabel('Measurement')
+plt.ylabel('Counts')
+```
+
+If then bootstrap the difference between the two means, we get a non-significant difference.
+
+```python
+significance = two_sample_testing(malignant[:, 9], benign[:, 9],
+                                  statistic_func=compare_means,
+                                  n_samples=5000)
+print(significance) # prints 0.387
+```
