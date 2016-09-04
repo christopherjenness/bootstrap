@@ -112,7 +112,7 @@ def bootstrap_statistic(data, func=np.mean, n_samples=50,
         statistic = statistic - bias
     sem = stats.sem(statistics)
     bootstrap_results = namedtuple('bootstrap_results', 'statistics statistic bias sem ci')
-    results = bootstrap_results(statistics=statistics, statistic=statistics, bias=bias, 
+    results = bootstrap_results(statistics=statistics, statistic=statistic, bias=bias, 
                                 sem=sem, ci=confidence_interval)
     return results
 
