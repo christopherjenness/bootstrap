@@ -93,6 +93,8 @@ plt.xlabel('Measurement')
 plt.ylabel('Counts')
 ```
 
+![split](http://i.imgur.com/rsVrDJT.png)
+
 It appears their is a different in the groups distribution.  The level of significance can be computer via the bootstrap method.
 
 ```python
@@ -112,6 +114,8 @@ plt.legend()
 plt.xlabel('Measurement')
 plt.ylabel('Counts')
 ```
+
+![Feature9](http://i.imgur.com/rsVrDJT.png)
 
 If then bootstrap the difference between the two means, we get a non-significant difference.
 
