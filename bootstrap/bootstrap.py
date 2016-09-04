@@ -6,10 +6,9 @@ Efron, Bradley, and Robert J. Tibshirani.
 An introduction to the bootstrap. CRC press, 1994.
 """
 
+from collections import namedtuple
 import numpy as np
 from scipy import stats
-
-
 
 def bootstrap_sample(data, parametric=False):
     """
@@ -112,7 +111,10 @@ def bootstrap_statistic(data, func=np.mean, n_samples=50,
     if bias_correction:
         statistic = statistic - bias
     sem = stats.sem(statistics)
-    return (statistic, bias, sem, confidence_interval)
+    bootstrap_results = namedtuple('bootstrap_results', 'statistics statistic bias sem ci')
+    results = bootstrap_results(statistics=statistics, statistic=statistics, bias=bias, 
+                                sem=sem, ci=confidence_interval)
+    return results
 
 def jackknife_statistic(data, func=np.mean):
     """
@@ -252,6 +254,3 @@ def t_test_statistic(sampleA, sampleB):
     stdev = (np.var(sampleA)/n + np.var(sampleB)/m)**0.5
     t_stat = difference / stdev
     return t_stat
-
-normal_data = np.random.normal(100, 10, size=100)
-statistic, bias, sem, confidence_interval = bootstrap_statistic(normal_data)
