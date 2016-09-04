@@ -115,7 +115,7 @@ plt.xlabel('Measurement')
 plt.ylabel('Counts')
 ```
 
-![Feature9](http://i.imgur.com/rsVrDJT.png)
+![Feature9](http://i.imgur.com/tCt1rnV.png)
 
 If then bootstrap the difference between the two means, we get a non-significant difference.
 
