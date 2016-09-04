@@ -219,7 +219,7 @@ def two_sample_testing(sampleA, sampleB,
         boot_statistic = statistic_func(boot_sampleA, boot_sampleB)
         if boot_statistic > observed_statistic:
             counter += 1
-    ASL = counter / float(m + n)
+    ASL = counter / float(n_samples)
     return ASL
 
 def compare_means(sampleA, sampleB):
