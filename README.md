@@ -75,3 +75,25 @@ ax.axvline(x=results.ci[1], color='red', linestyle='dashed', linewidth=2)
 ax.axvline(x=results.statistic, color='black', linewidth=5)
 ```
 ![Percentile](http://i.imgur.com/SJkAh4l.png)
+
+Additionally, the library can perform two sample testing.  First lets view the distribution of the same data, but broken up by tumor type.
+
+```python
+benign = data.data[data.target == 0]
+malignant = data.data[data.target == 1]
+plt.hist(benign[:,0], bins=30, alpha=0.5, label='benign')
+plt.hist(malignant[:,0], bins=30, alpha=0.5, label='malignant')
+plt.legend()
+plt.xlabel('Measurement')
+plt.ylabel('Counts')
+```
+
+It appears their is a different in the groups distribution.  The level of significance can be computer via the bootstrap method.
+
+```python
+significance = two_sample_testing(benign[:, 0], malignant[:, 0],
+                                  statistic_func=compare_means,
+                                  n_samples=5000)
+print(significance) # prints 0.0
+```
+Hmmm, with 5,000 random bootstrapped samples, not a single one had the difference of means of the observed samples.
