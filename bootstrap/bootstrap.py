@@ -17,7 +17,7 @@ def bootstrap_sample(data, parametric=False):
 
     Args
     ---------
-    data : 1d np.array
+    data : 1d array
         Data to resample
     parametric : str in ['normal', 'uniform']
         parametric distribution to resample from,
@@ -28,12 +28,16 @@ def bootstrap_sample(data, parametric=False):
     resamples : array
         bootstrap resampled data
     """
+    dists = ['normal', 'uniform']
+    if parametric not in dists and parametric is not False:
+        raise ValueError("Invalid parametric argument.")
+
     sample_size = len(data)
-    if parametric == 'normal':
+    if parametric is dists[0]:
         mean_estimate = np.mean(data)
         std_estimate = np.std(data)
         return np.random.normal(mean_estimate, std_estimate, size=sample_size)
-    elif parametric == 'uniform':
+    elif parametric is dists[1]:
         min_estimate, max_estimate = np.min(data), np.max(data)
         return np.random.uniform(min_estimate, max_estimate, size=sample_size)
     else:
@@ -60,11 +64,11 @@ def bootstrap_matrixsample(data, axis=0):
         bootstrap resampled data
     """
 
-    if axis == 0:
+    if axis is 0:
         n_rows = np.shape(data)[0]
         samples = np.random.randint(n_rows, size=n_rows)
         bootstrap_matrix = data[samples, :]
-    elif axis == 1:
+    elif axis is 1:
         n_cols = np.shape(data)[1]
         samples = np.random.randint(n_cols, size=n_cols)
         bootstrap_matrix = data[:, samples]
@@ -126,6 +130,8 @@ def bootstrap_statistic(data, func=np.mean, n_samples=50,
     """
     plugin_estimate = func(data)
     statistics = []
+
+    # Compute statistics and mean it to get statistic's value
     for sample in range(n_samples):
         if isinstance(data, np.matrix):
             resample = bootstrap_matrixsample(data, axis=axis)
@@ -134,12 +140,19 @@ def bootstrap_statistic(data, func=np.mean, n_samples=50,
         statistic = func(resample)
         statistics.append(statistic)
     statistic = np.mean(statistics)
+
+    # CI for the statistic
     confidence_interval = calculate_ci(data, statistics, func=func,
                                        alpha=alpha, bca=bca)
+
+    # Compute bias and, if requested, correct for it
     bias = statistic - plugin_estimate
     if bias_correction:
         statistic = statistic - bias
+
     sem = stats.sem(statistics)
+
+    # Pack together the results
     bootstrap_results = namedtuple('bootstrap_results',
                                    'statistics statistic bias sem ci')
     results = bootstrap_results(statistics=statistics, statistic=statistic,
@@ -167,6 +180,7 @@ def jackknife_statistic(data, func=np.mean):
     """
     n_samples = len(data)
     statistics = []
+
     for sample in range(n_samples):
         jack_sample = jackknife_sample(data, sample)
         statistic = func(jack_sample)
@@ -218,6 +232,7 @@ def calculate_ci(data, statistics, func=np.mean,
     sorted_statistics = np.sort(statistics)
     low_index = int(np.floor(alpha * len(statistics)))
     high_index = int(np.ceil((1 - alpha) * len(statistics)))
+
     # Correct for 0 based indexing
     if low_index > 0:
         low_index -= 1
@@ -255,11 +270,12 @@ def two_sample_testing(sampleA, sampleB,
     """
     if statistic_func is None:
         statistic_func = compare_means
+
     observed_statistic = statistic_func(sampleA, sampleB)
     combined_sample = np.append(sampleA, sampleB)
-    # Store sample sizes
-    m = len(sampleA)
+
     # Count the number of bootstrap samples with statistic > observed_statistic
+    m = len(sampleA)
     counter = 0
     for sample in range(n_samples):
         boot_sample = bootstrap_sample(combined_sample)
@@ -268,6 +284,7 @@ def two_sample_testing(sampleA, sampleB,
         boot_statistic = statistic_func(boot_sampleA, boot_sampleB)
         if boot_statistic > observed_statistic:
             counter += 1
+
     ASL = counter / float(n_samples)
     return ASL
 
