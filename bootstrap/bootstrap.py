@@ -47,6 +47,7 @@ def bootstrap_matrixsample(data, axis=0):
     Returns:
         bootstrap resampled data (matrix)
     """
+
     if axis == 0:
         n_rows = np.shape(data)[0]
         samples = np.random.randint(n_rows, size=n_rows)
