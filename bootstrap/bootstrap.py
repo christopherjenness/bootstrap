@@ -29,15 +29,15 @@ def bootstrap_sample(data, parametric=False):
         bootstrap resampled data
     """
     dists = ['normal', 'uniform']
-    if parametric not in dists and parametric is not False:
+    if parametric and parametric not in dists:
         raise ValueError("Invalid parametric argument.")
 
     sample_size = len(data)
-    if parametric is dists[0]:
+    if parametric == dists[0]:
         mean_estimate = np.mean(data)
         std_estimate = np.std(data)
         return np.random.normal(mean_estimate, std_estimate, size=sample_size)
-    elif parametric is dists[1]:
+    elif parametric == dists[1]:
         min_estimate, max_estimate = np.min(data), np.max(data)
         return np.random.uniform(min_estimate, max_estimate, size=sample_size)
     else:
@@ -64,11 +64,11 @@ def bootstrap_matrixsample(data, axis=0):
         bootstrap resampled data
     """
 
-    if axis is 0:
+    if axis == 0:
         n_rows = np.shape(data)[0]
         samples = np.random.randint(n_rows, size=n_rows)
         bootstrap_matrix = data[samples, :]
-    elif axis is 1:
+    elif axis == 1:
         n_cols = np.shape(data)[1]
         samples = np.random.randint(n_cols, size=n_cols)
         bootstrap_matrix = data[:, samples]
