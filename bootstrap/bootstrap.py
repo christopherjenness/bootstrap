@@ -28,18 +28,24 @@ def bootstrap_sample(data, parametric=False):
     resamples : array
         bootstrap resampled data
     """
-    dists = ['normal', 'uniform']
+    dists = ['normal', 'uniform', 'poisson']
     if parametric and parametric not in dists:
         raise ValueError("Invalid parametric argument.")
 
     sample_size = len(data)
     if parametric == dists[0]:
+        # Normal distribution
         mean_estimate = np.mean(data)
         std_estimate = np.std(data)
         return np.random.normal(mean_estimate, std_estimate, size=sample_size)
     elif parametric == dists[1]:
+        # Uniform distributuon
         min_estimate, max_estimate = np.min(data), np.max(data)
         return np.random.uniform(min_estimate, max_estimate, size=sample_size)
+    elif parametric == dists[2]:
+        # Poisson distribution
+        lambda_estimate = np.mean(data)
+        return np.random.poisson(lam=lambda_estimate, size=sample_size)
     else:
         inds = [np.random.randint(0, sample_size) for i in range(sample_size)]
         return data[inds]
@@ -321,7 +327,7 @@ def t_test_statistic(sampleA, sampleB):
     Returns:
     ---------
     t_stat : float
-        t test statistic of two sampels
+        t test statistic of two samples
     """
     difference = compare_means(sampleA, sampleB)
     # Store lengths of samples

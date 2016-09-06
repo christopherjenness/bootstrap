@@ -14,8 +14,9 @@ class BootstrapInit(unittest.TestCase):
         np.random.seed(0)
         self.uniform_data = np.random.uniform(0, 100, size=100)
         np.random.seed(0)
+        self.poisson_data = np.random.poisson(10, size=(100))        
+        np.random.seed(0)
         self.matrix_data = np.random.normal(100, 10, size=(100, 100))
-
 
 class ResamplingTestCase(BootstrapInit):
     def testNonparametric(self):
@@ -37,6 +38,13 @@ class ResamplingTestCase(BootstrapInit):
         self.assertAlmostEqual(np.mean(self.uniform_data)/10000,
                                np.mean(bootstrap_data)/10000, 3)
         self.assertEqual(len(bootstrap_data), len(self.uniform_data))
+
+    def testPoissonParametric(self):
+        bootstrap_data = bootstrap_sample(self.poisson_data,
+                                          parametric='poisson')
+        self.assertAlmostEqual(np.mean(self.poisson_data)/10000,
+                               np.mean(bootstrap_data)/10000, 3)
+        self.assertEqual(len(bootstrap_data), len(self.poisson_data))
 
     def testJackknifeSample(self):
         jackknife_data = jackknife_sample(self.uniform_data, 10)
