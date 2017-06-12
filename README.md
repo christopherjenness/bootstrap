@@ -1,5 +1,7 @@
 # Bootstrap
 
+![TRAVIS](https://travis-ci.org/christopherjenness/bootstrap.svg?branch=master) [![Coverage Status](https://coveralls.io/repos/github/christopherjenness/bootstrap/badge.svg?branch=master)](https://coveralls.io/github/christopherjenness/bootstrap?branch=master)
+
 A library for bootstrapping statistics.
 
 ## Features
