@@ -1,8 +1,9 @@
 import unittest
+import numpy as np
+import coveralls
 from bootstrap.bootstrap import bootstrap_sample, jackknife_sample, \
         compare_means, t_test_statistic, two_sample_testing, \
         bootstrap_matrixsample, bootstrap_statistic, jackknife_statistic
-import numpy as np
 
 
 class BootstrapInit(unittest.TestCase):
