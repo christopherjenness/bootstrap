@@ -19,7 +19,7 @@ def bootstrap_sample(data, parametric=False):
     ---------
     data : 1d array
         Data to resample
-    parametric : str in ['normal', 'uniform']
+    parametric : str in ['normal', 'uniform', 'poisson']
         parametric distribution to resample from,
         if False, use nonparametric bootstrap sampling
 
@@ -33,17 +33,14 @@ def bootstrap_sample(data, parametric=False):
         raise ValueError("Invalid parametric argument.")
 
     sample_size = len(data)
-    if parametric == dists[0]:
-        # Normal distribution
+    if parametric == 'normal':
         mean_estimate = np.mean(data)
         std_estimate = np.std(data)
         return np.random.normal(mean_estimate, std_estimate, size=sample_size)
-    elif parametric == dists[1]:
-        # Uniform distributuon
+    elif parametric == 'uniform':
         min_estimate, max_estimate = np.min(data), np.max(data)
         return np.random.uniform(min_estimate, max_estimate, size=sample_size)
-    elif parametric == dists[2]:
-        # Poisson distribution
+    elif parametric == 'poisson':
         lambda_estimate = np.mean(data)
         return np.random.poisson(lam=lambda_estimate, size=sample_size)
     else:
